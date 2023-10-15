@@ -1,0 +1,1 @@
+JS Discord Bot restarted.
