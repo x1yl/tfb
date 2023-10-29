@@ -1,1 +1,1 @@
-JS Discord Bot restarted.
+Finished ticket bot for the most part
