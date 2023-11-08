@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, PermissionsBitField } = require('discord.js');
 const { MongoClient } = require('mongodb');
 const { mongoUri } = require('../../config.json');
+const { PermissionFlagsBits } = require('discord.js');
 
 async function muteUser(guildId, userId, length, currentTime, unmuteTime) {
   const client = new MongoClient(mongoUri);
@@ -59,14 +60,10 @@ module.exports = {
         .setRequired(true))
     .addStringOption(option =>
       option.setName('reason')
-        .setDescription('Optional reason for the mute')),
+        .setDescription('Optional reason for the mute'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers)
+		.setDMPermission(false),
   async execute(interaction) {
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.MuteMembers)) {
-      return interaction.reply({
-        content: "You don't have permission to mute members.",
-        ephemeral: true,
-      });
-    }
     
     const user = interaction.options.getMember('user'); // Get the user as a GuildMember
     const userId = user.id;

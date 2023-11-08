@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, PermissionsBitField } = require("discord.js");
+const { PermissionFlagsBits } = require('discord.js');
 const { EmbedBuilder } = require("discord.js");
 const { mongoUri } = require("../../config.json");
 const { MongoClient } = require("mongodb");
@@ -20,6 +21,8 @@ async function reactionRole(messageId, emo, role, max) {
 module.exports = {
   category: "utility",
   data: new SlashCommandBuilder()
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+		.setDMPermission(false)
     .setName("reaction")
     .setDescription("Assign roles based on reactions.")
     .addStringOption((option) =>

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, PermissionsBitField } = require('discord.js');
 const { MongoClient } = require('mongodb');
 const { mongoUri } = require('../../config.json');
+const { PermissionFlagsBits } = require('discord.js');
 
 async function unmuteUser(guildId, userId) {
   const client = new MongoClient(mongoUri);
@@ -45,14 +46,10 @@ module.exports = {
     .addUserOption(option =>
       option.setName('user')
         .setDescription('The user to unmute')
-        .setRequired(true)),
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers)
+		.setDMPermission(false),
   async execute(interaction) {
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.MuteMembers)) {
-      return interaction.reply({
-        content: "You don't have permission to unmute members.",
-        ephemeral: true,
-      });
-    }
 
     const user = interaction.options.getMember('user'); // Get the user as a GuildMember
     const userId = user.id;
@@ -62,7 +59,7 @@ module.exports = {
     const mutedRole = interaction.guild.roles.cache.find(role => role.name === muteRoleName);
 
     if (!mutedRole) {
-      return interaction.reply('Muted role not found for this server. Make sure the role exists.');
+      return interaction.reply('Muted role (Muted) not found for this server. Make sure the role exists.');
     }
 
     if (!user.roles.cache.has(mutedRole.id)) {
