@@ -1,23 +1,21 @@
 const { SlashCommandBuilder, PermissionsBitField } = require("discord.js");
-const { EmbedBuilder } = require('discord.js');
-const { mongoUri } = require('../../config.json');
+const { EmbedBuilder } = require("discord.js");
+const { mongoUri } = require("../../config.json");
 const { MongoClient } = require("mongodb");
 const uri = mongoUri;
 const mongodb = new MongoClient(uri);
 
-async function reactionRole(messageId, emo, role) {
+async function reactionRole(messageId, emo, role, max) {
   try {
-    const database = mongodb.db('Discord');
-    const collection = database.collection('reactionRole');
-    const doc = { messageId: messageId, emoji: emo, role: role };
+    const database = mongodb.db("Discord");
+    const collection = database.collection("reactionRole");
+    const doc = { messageId: messageId, emoji: emo, role: role, only: max };
     const result = await collection.insertOne(doc);
   } finally {
     // Ensures that the client will close when you finish/error
     await mongodb.close();
   }
 }
-
-
 
 module.exports = {
   category: "utility",
@@ -33,19 +31,27 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("roles")
-        .setDescription("Enter the roles separated by spaces (in the same order as emojis)")
+        .setDescription(
+          "Enter the roles separated by spaces (in the same order as emojis)"
+        )
         .setRequired(true)
     )
     .addStringOption((option) =>
+      option.setName("title").setDescription("Title of embed").setRequired(true)
+    )
+    .addStringOption((option) =>
       option
-        .setName("title")
-        .setDescription("Title of embed")
+        .setName("1")
+        .setDescription("true (max 1) or false (no max)")
         .setRequired(true)
     ),
   async execute(interaction) {
-    const reactionEmojis = interaction.options.getString("reaction_emojis").split(" ");
+    const reactionEmojis = interaction.options
+      .getString("reaction_emojis")
+      .split(" ");
     const roles = interaction.options.getString("roles").split(" ");
     const title = interaction.options.getString("title");
+    const max = interaction.options.getString("1");
 
     if (
       interaction.member.permissions.has(
@@ -90,15 +96,21 @@ module.exports = {
       const messageId = message.id;
 
       for (let i = 0; i < reactionEmojis.length; i++) {
-        roleId = roles[i].replace(/\D/g, "")
-        reactionRole(messageId, reactionEmojis[i], roleId);
+        roleId = roles[i].replace(/\D/g, "");
+        reactionRole(messageId, reactionEmojis[i], roleId, max);
       }
 
       // Confirmation message
-      await interaction.followUp({content:"Reaction roles set up successfully.", ephemeral: true});
+      await interaction.followUp({
+        content: "Reaction roles set up successfully.",
+        ephemeral: true,
+      });
     } catch (error) {
       console.error(error);
-      await interaction.followUp({content: "An error occurred.", ephemeral: true});
+      await interaction.followUp({
+        content: "An error occurred.",
+        ephemeral: true,
+      });
     }
   },
 };
