@@ -44,10 +44,11 @@ module.exports = {
         );
       }
     } else {
-      await interaction.reply({content: "Shhh, you weren't supposed to see this [https￶://discord.gift/wdgrg](<https://discord.com\\vanityurl/dotcom/steakpants/flour/flower/index11.html>)", ephemeral: true});
+      await interaction.reply({
+        content:
+          "Shhh, you weren't supposed to see this [https￶://discord.gift/wdgrg](<https://discord.com\\vanityurl/dotcom/steakpants/flour/flower/index11.html>)",
+        ephemeral: true,
+      });
     }
   },
 };
-
-
-

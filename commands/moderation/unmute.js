@@ -1,15 +1,15 @@
-const { SlashCommandBuilder, PermissionsBitField } = require('discord.js');
-const { MongoClient } = require('mongodb');
-const { mongoUri } = require('../../config.json');
-const { PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionsBitField } = require("discord.js");
+const { MongoClient } = require("mongodb");
+const { mongoUri } = require("../../config.json");
+const { PermissionFlagsBits } = require("discord.js");
 
 async function unmuteUser(guildId, userId) {
   const client = new MongoClient(mongoUri);
 
   try {
     await client.connect();
-    const db = client.db('Discord');
-    const collection = db.collection('muted');
+    const db = client.db("Discord");
+    const collection = db.collection("muted");
 
     // Delete the mute document for the specified user and guild
     await collection.deleteOne({ guildId: guildId, userId: userId });
@@ -23,8 +23,8 @@ async function getMuteRole(guildId) {
 
   try {
     await client.connect();
-    const db = client.db('Discord');
-    const collection = db.collection('muteRoles');
+    const db = client.db("Discord");
+    const collection = db.collection("muteRoles");
 
     const muteRoleDocument = await collection.findOne({ guildId: guildId });
 
@@ -39,27 +39,32 @@ async function getMuteRole(guildId) {
 }
 
 module.exports = {
-  category: 'moderation',
+  category: "moderation",
   data: new SlashCommandBuilder()
-    .setName('unmute')
-    .setDescription('Unmute a user.')
-    .addUserOption(option =>
-      option.setName('user')
-        .setDescription('The user to unmute')
-        .setRequired(true))
+    .setName("unmute")
+    .setDescription("Unmute a user.")
+    .addUserOption((option) =>
+      option
+        .setName("user")
+        .setDescription("The user to unmute")
+        .setRequired(true)
+    )
     .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers)
-		.setDMPermission(false),
+    .setDMPermission(false),
   async execute(interaction) {
-
-    const user = interaction.options.getMember('user'); // Get the user as a GuildMember
+    const user = interaction.options.getMember("user"); // Get the user as a GuildMember
     const userId = user.id;
     const guildId = interaction.guild.id;
-    const muteRoleName = await getMuteRole(guildId)
+    const muteRoleName = await getMuteRole(guildId);
     // Assuming you have a "Muted" role in your server
-    const mutedRole = interaction.guild.roles.cache.find(role => role.name === muteRoleName);
+    const mutedRole = interaction.guild.roles.cache.find(
+      (role) => role.name === muteRoleName
+    );
 
     if (!mutedRole) {
-      return interaction.reply('Muted role (Muted) not found for this server. Make sure the role exists.');
+      return interaction.reply(
+        "Muted role (Muted) not found for this server. Make sure the role exists."
+      );
     }
 
     if (!user.roles.cache.has(mutedRole.id)) {
@@ -69,10 +74,13 @@ module.exports = {
     try {
       await user.roles.remove(mutedRole);
       await unmuteUser(guildId, userId);
-      interaction.reply({content: `Unmuted ${user.user.tag}.`, ephemeral: true,});
+      interaction.reply({
+        content: `Unmuted ${user.user.tag}.`,
+        ephemeral: true,
+      });
     } catch (error) {
       console.error(error);
-      interaction.reply('An error occurred while unmuting the user.');
+      interaction.reply("An error occurred while unmuting the user.");
     }
   },
 };
