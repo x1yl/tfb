@@ -10,11 +10,11 @@ async function reactionRole(messageId, emo, role, max) {
   try {
     const database = mongodb.db("Discord");
     const collection = database.collection("reactionRole");
-    const doc = { messageId: messageId, emoji: emo, role: role, only: max };
+    const doc = { messageId, emoji: emo, role, max };
     const result = await collection.insertOne(doc);
   } finally {
     // Ensures that the client will close when you finish/error
-    await mongodb.close();
+    //await mongodb.close();
   }
 }
 
@@ -44,8 +44,8 @@ module.exports = {
     )
     .addStringOption((option) =>
       option
-        .setName("1")
-        .setDescription("true (max 1) or false (no max)")
+        .setName("maximum")
+        .setDescription("The maximum amount of reactions they can select.")
         .setRequired(true)
     ),
   async execute(interaction) {
@@ -54,7 +54,7 @@ module.exports = {
       .split(" ");
     const roles = interaction.options.getString("roles").split(" ");
     const title = interaction.options.getString("title");
-    const max = interaction.options.getString("1");
+    const max = interaction.options.getString("maximum");
 
     if (
       interaction.member.permissions.has(
@@ -102,7 +102,6 @@ module.exports = {
         roleId = roles[i].replace(/\D/g, "");
         reactionRole(messageId, reactionEmojis[i], roleId, max);
       }
-
       // Confirmation message
       await interaction.followUp({
         content: "Reaction roles set up successfully.",

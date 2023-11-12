@@ -84,58 +84,61 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     const collection = database.collection("reactionRole");
 
     // Get all documents with the same messageId and emoji
-    const docs = await collection.find({ messageId }).toArray();
+    const docs = await collection.findOne({ messageId, emoji });
 
-    if (docs && docs.length > 0) {
+    if (docs) {
       const guild = reaction.message.guild;
       const member = guild.members.cache.get(user.id);
-
+      const amountCollection = database.collection("amount");
       if (member) {
-        for (const doc of docs) {
-          const role = doc.role;
-          if (emoji == doc.emoji) {
-            // Check if the user has the role
-            if (!member.roles.cache.has(role)) {
-              // If not, give them the role
-              member.roles.add(role).catch(console.error);
-            }
-          }
+        const maxReactions = docs.max;
+        const role = docs.role;
 
-          // Check if the document has "only" set to true
-          if (doc.only === "true") {
-            // Remove any other roles with the same messageId
-            const otherRoles = docs.filter(
-              (otherDoc) => otherDoc.emoji !== emoji
-            );
-            for (const otherDoc of otherRoles) {
-              const otherRole = otherDoc.role;
-              if (member.roles.cache.has(otherRole)) {
-                member.roles.remove(otherRole).catch(console.error);
-              }
-            }
+        const amountDocument = await amountCollection.findOne({
+          messageId,
+          user: user.id,
+        });
+        const currentValue = amountDocument ? amountDocument.value : 0;
+        const amountDoc = await amountCollection.findOneAndUpdate(
+          { messageId, user: user.id },
+          { $inc: { value: 1 } }, // Increment the value by 1 or create the document if it doesn't exist
+          { upsert: true } // Create a new document if not found
+        );
+        if (currentValue >= maxReactions) {
+          user.send(
+            `You have selected the maximum allowed roles for ${messageId} (${maxReactions})`
+          );
+          try {
+            // Fetch all reactions on the message
             const message = reaction.message;
+            const allReactions = message.reactions.cache;
 
-            try {
-              // Fetch all reactions on the message
-              const allReactions = message.reactions.cache;
+            // Iterate through all reactions and users
+            for (const [emoji, reactionInstance] of allReactions) {
+              const users = await reactionInstance.users.fetch();
 
-              // Iterate through all reactions and users
-              for (const [emoji, reactionInstance] of allReactions) {
-                const users = await reactionInstance.users.fetch();
-
-                // Check if it's not the current user's reaction
-                if (emoji !== reaction.emoji.name) {
-                  // Remove the current user's reaction from other users
-                  if (users.has(user.id)) {
-                    reactionInstance.users.remove(user.id);
-                  }
+              // Check if it's not the current user's reaction
+              if (emoji == reaction.emoji.name) {
+                // Remove the current user's reaction from other users
+                if (users.has(user.id)) {
+                  reactionInstance.users.remove(user.id);
                 }
               }
-            } catch (error) {
-              console.error("Error removing reactions:", error);
             }
+          } catch (error) {
+            console.error("Error removing reactions:", error);
+          }
+          return;
+        }
+        if (emoji == docs.emoji) {
+          // Check if the user has the role
+          if (!member.roles.cache.has(role)) {
+            // If not, give them the role
+            member.roles.add(role).catch(console.error);
           }
         }
+
+        // Check if the document has "only" set to true
       }
     }
   } catch (error) {
@@ -167,6 +170,7 @@ client.on(Events.MessageReactionRemove, async (reaction, user) => {
     await mongodb.connect();
     const database = mongodb.db("Discord");
     const collection = database.collection("reactionRole");
+    const amountCollection = database.collection("amount");
     const doc = await collection.findOne({ messageId, emoji });
 
     if (doc) {
@@ -176,7 +180,13 @@ client.on(Events.MessageReactionRemove, async (reaction, user) => {
 
       if (member) {
         // Check if the user has the role
+
         member.roles.remove(role).catch(console.error);
+        const amountDoc = await amountCollection.findOneAndUpdate(
+          { messageId, user: user.id },
+          { $inc: { value: -1 } }, // Increment the value by 1 or create the document if it doesn't exist
+          { upsert: true } // Create a new document if not found
+        );
       }
     }
   } catch (error) {
