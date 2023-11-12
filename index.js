@@ -74,7 +74,12 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
   }
   if (user.bot) return; // Ignore reactions from bots
 
-  const emoji = reaction.emoji.name; // Get the reacted emoji
+  emoji = reaction.emoji.name; // Get the reacted emoji
+  const regexExp =
+    /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi;
+  if (!regexExp.test(emoji)) {
+    emoji = `:${emoji}:`;
+  }
   const messageId = reaction.message.id;
 
   try {
@@ -84,8 +89,11 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     const collection = database.collection("reactionRole");
 
     // Get all documents with the same messageId and emoji
-    const docs = await collection.findOne({ messageId, emoji });
-
+    const regex = new RegExp(emoji);
+    const docs = await collection.findOne({
+      messageId,
+      emoji: { $regex: regex },
+    });
     if (docs) {
       const guild = reaction.message.guild;
       const member = guild.members.cache.get(user.id);
@@ -130,12 +138,11 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
           }
           return;
         }
-        if (emoji == docs.emoji) {
-          // Check if the user has the role
-          if (!member.roles.cache.has(role)) {
-            // If not, give them the role
-            member.roles.add(role).catch(console.error);
-          }
+
+        // Check if the user has the role
+        if (!member.roles.cache.has(role)) {
+          // If not, give them the role
+          member.roles.add(role).catch(console.error);
         }
 
         // Check if the document has "only" set to true
@@ -162,7 +169,12 @@ client.on(Events.MessageReactionRemove, async (reaction, user) => {
   }
   if (user.bot) return; // Ignore reactions from bots
 
-  const emoji = reaction.emoji.name; // Get the reacted emoji
+  emoji = reaction.emoji.name; // Get the reacted emoji
+  const regexExp =
+    /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi;
+  if (!regexExp.test(emoji)) {
+    emoji = `:${emoji}:`;
+  }
   const messageId = reaction.message.id;
 
   try {
@@ -171,8 +183,11 @@ client.on(Events.MessageReactionRemove, async (reaction, user) => {
     const database = mongodb.db("Discord");
     const collection = database.collection("reactionRole");
     const amountCollection = database.collection("amount");
-    const doc = await collection.findOne({ messageId, emoji });
-
+    const regex = new RegExp(emoji);
+    const doc = await collection.findOne({
+      messageId,
+      emoji: { $regex: regex },
+    });
     if (doc) {
       const role = doc.role;
       const guild = reaction.message.guild;
