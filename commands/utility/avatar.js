@@ -20,12 +20,10 @@ module.exports = {
       embed = new EmbedBuilder()
         .setTitle(`${userAvatar.user.tag}'s Avatar`)
         .setImage(userAvatar.displayAvatarURL({ dynamic: true, size: 1024 }))
-        .setColor("#0099ff");
     } else {
       embed = new EmbedBuilder()
         .setTitle(`${userAvatar.tag}'s Avatar`)
         .setImage(userAvatar.displayAvatarURL({ dynamic: true, size: 1024 }))
-        .setColor("#0099ff");
     }
     await interaction.reply({ embeds: [embed] });
   },

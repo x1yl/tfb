@@ -46,7 +46,9 @@ module.exports = {
     const question = interaction.options.getString("question");
     const choices = [];
 
-    const pollEmbed = new EmbedBuilder().setTitle(question);
+    const pollEmbed = new EmbedBuilder()
+      .setTitle(question)
+      .setFooter({text: `Poll by ${interaction.user.tag}`});
 
     for (let i = 1; i <= 10; i++) {
       const choice = interaction.options.getString(`choice${i}`);

@@ -11,7 +11,7 @@ module.exports = {
         .setDescription("The member to kick")
         .setRequired(true)
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
     .setDMPermission(false),
   category: "moderation",
   async execute(interaction) {
