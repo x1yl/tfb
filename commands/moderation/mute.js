@@ -1,14 +1,15 @@
-const { SlashCommandBuilder, PermissionsBitField } = require('discord.js');
-const { MongoClient } = require('mongodb');
-const { mongoUri } = require('../../config.json');
+const { SlashCommandBuilder, PermissionsBitField } = require("discord.js");
+const { MongoClient } = require("mongodb");
+const { mongoUri } = require("../../config.json");
+const { PermissionFlagsBits } = require("discord.js");
 
 async function muteUser(guildId, userId, length, currentTime, unmuteTime) {
   const client = new MongoClient(mongoUri);
 
   try {
     await client.connect();
-    const db = client.db('Discord');
-    const collection = db.collection('muted');
+    const db = client.db("Discord");
+    const collection = db.collection("muted");
 
     const muteDocument = {
       guildId: guildId,
@@ -19,7 +20,6 @@ async function muteUser(guildId, userId, length, currentTime, unmuteTime) {
     };
 
     const result = await collection.insertOne(muteDocument);
-
   } finally {
     await client.close();
   }
@@ -30,8 +30,8 @@ async function getMuteRole(guildId) {
 
   try {
     await client.connect();
-    const db = client.db('Discord');
-    const collection = db.collection('muteRoles');
+    const db = client.db("Discord");
+    const collection = db.collection("muteRoles");
 
     const muteRoleDocument = await collection.findOne({ guildId: guildId });
     if (muteRoleDocument) {
@@ -45,33 +45,33 @@ async function getMuteRole(guildId) {
 }
 
 module.exports = {
-  category: 'moderation',
+  category: "moderation",
   data: new SlashCommandBuilder()
-    .setName('mute')
-    .setDescription('Mute a user for a specified length of time.')
-    .addUserOption(option =>
-      option.setName('user') 
-        .setDescription('The user to mute')
-        .setRequired(true))
-    .addStringOption(option =>
-      option.setName('length')
-        .setDescription('The length of the mute (e.g., 1h, 30m)')
-        .setRequired(true))
-    .addStringOption(option =>
-      option.setName('reason')
-        .setDescription('Optional reason for the mute')),
+    .setName("mute")
+    .setDescription("Mute a user for a specified length of time.")
+    .addUserOption((option) =>
+      option
+        .setName("user")
+        .setDescription("The user to mute")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("length")
+        .setDescription("The length of the mute (e.g., 1h, 30m)")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option.setName("reason").setDescription("Optional reason for the mute")
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers)
+    .setDMPermission(false),
   async execute(interaction) {
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.MuteMembers)) {
-      return interaction.reply({
-        content: "You don't have permission to mute members.",
-        ephemeral: true,
-      });
-    }
-    
-    const user = interaction.options.getMember('user'); // Get the user as a GuildMember
+    const user = interaction.options.getMember("user"); // Get the user as a GuildMember
     const userId = user.id;
-    const length = interaction.options.getString('length');
-    const reason = interaction.options.getString('reason') || 'No reason provided';
+    const length = interaction.options.getString("length");
+    const reason =
+      interaction.options.getString("reason") || "No reason provided";
     const guildId = interaction.guild.id;
 
     // Calculate unmute time based on the current time and the specified length
@@ -82,14 +82,20 @@ module.exports = {
     const muteRoleName = await getMuteRole(guildId);
 
     if (!muteRoleName) {
-      return interaction.reply('Mute role not set for this server. Set up the mute role with /mute-role.');
+      return interaction.reply(
+        "Mute role not set for this server. Set up the mute role with /mute-role."
+      );
     }
 
     // Get the mute role from the guild's cache
-    const mutedRole = interaction.guild.roles.cache.find(role => role.name === muteRoleName);
+    const mutedRole = interaction.guild.roles.cache.find(
+      (role) => role.name === muteRoleName
+    );
 
     if (!mutedRole) {
-      return interaction.reply('Mute role not found in this server. Make sure the mute role exists.');
+      return interaction.reply(
+        "Mute role not found in this server. Make sure the mute role exists."
+      );
     }
 
     if (user.roles.cache.has(mutedRole.id)) {
@@ -97,15 +103,17 @@ module.exports = {
     }
 
     try {
-      await user.roles.add(mutedRole); 
+      await user.roles.add(mutedRole);
       await muteUser(guildId, userId, length, currentTime, unmuteTime);
-      interaction.reply(`Muted ${user.user.tag} for ${length} due to: ${reason}`);
+      interaction.reply(
+        `Muted ${user.user.tag} for ${length} due to: ${reason}`
+      );
     } catch (error) {
       console.error(error);
-      interaction.reply('An error occurred while muting the user.');
+      interaction.reply("An error occurred while muting the user.");
     }
   },
-};  
+};
 
 // Helper function to parse time strings into milliseconds
 function parseTimeToMilliseconds(timeString) {

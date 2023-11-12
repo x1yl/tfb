@@ -13,7 +13,7 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction) {
-    if (interaction.guild.id === guildId || devId === interaction.user.id) {
+    if (devId === interaction.user.id) {
       const commandName = interaction.options
         .getString("command", true)
         .toLowerCase();
@@ -44,7 +44,11 @@ module.exports = {
         );
       }
     } else {
-      await interaction.reply("This command is not available here.");
+      await interaction.reply({
+        content:
+          "Shhh, you weren't supposed to see this [https￶://discord.gift/wdgrg](<https://discord.com\\vanityurl/dotcom/steakpants/flour/flower/index11.html>)",
+        ephemeral: true,
+      });
     }
   },
 };

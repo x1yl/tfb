@@ -4,8 +4,11 @@ const {
   ChannelType,
 } = require("discord.js");
 
-const { supportName, closedTicketCategory, openTicketCategory } = require('../../config.json');
-
+const {
+  supportName,
+  closedTicketCategory,
+  openTicketCategory,
+} = require("../../config.json");
 
 module.exports = {
   category: "utility",
@@ -88,13 +91,12 @@ module.exports = {
         });
       }
 
-         category = interaction.guild.channels.cache.find(
-          (channel) => channel.name === openTicketCategory
-        );
-        await channel.setParent(category, {
-          lockPermissions: false,
-        });
-      
+      category = interaction.guild.channels.cache.find(
+        (channel) => channel.name === openTicketCategory
+      );
+      await channel.setParent(category, {
+        lockPermissions: false,
+      });
     } else if (interaction.options.getSubcommand() === "close") {
       try {
         if (interaction.channel.name.toLowerCase().includes("ticket")) {
@@ -128,13 +130,12 @@ module.exports = {
             }
             await interaction.reply("Ticket closed!");
 
-               category = interaction.guild.channels.cache.find(
-                (channel) => channel.name === closedTicketCategory
-              );
-              await interaction.channel.setParent(category, {
-                lockPermissions: true,
-              });
-            
+            category = interaction.guild.channels.cache.find(
+              (channel) => channel.name === closedTicketCategory
+            );
+            await interaction.channel.setParent(category, {
+              lockPermissions: true,
+            });
           }
         }
       } catch (error) {

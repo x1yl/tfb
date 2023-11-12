@@ -12,12 +12,10 @@ module.exports = {
         .setRequired(true)
     )
     .addStringOption((option) =>
-      option
-        .setName("reason")
-        .setDescription("Reason for unbanning the member")
+      option.setName("reason").setDescription("Reason for unbanning the member")
     )
-		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
-		.setDMPermission(false),
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+    .setDMPermission(false),
   category: "moderation",
   async execute(interaction) {
     const member = interaction.options.getString("user");
@@ -25,7 +23,7 @@ module.exports = {
 
     // Attempt to kick the member
     try {
-        await interaction.guild.bans.remove(member, reason)
+      await interaction.guild.bans.remove(member, reason);
       return interaction.reply({
         content: `Unbanned ${member.user.tag} successfully for the reason: ${reason}.`,
         ephemeral: true,

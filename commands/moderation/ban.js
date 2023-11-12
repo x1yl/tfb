@@ -12,12 +12,10 @@ module.exports = {
         .setRequired(true)
     )
     .addStringOption((option) =>
-      option
-        .setName("reason")
-        .setDescription("Reason for banning the member")
+      option.setName("reason").setDescription("Reason for banning the member")
     )
-		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
-		.setDMPermission(false),
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+    .setDMPermission(false),
   category: "moderation",
   async execute(interaction) {
     const member = interaction.options.getMember("user");

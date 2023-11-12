@@ -1,7 +1,7 @@
-
 # Current Commands
 
 ### Moderation
+
 - Ban
 - Kick
 - Mute
@@ -9,6 +9,7 @@
 - Prune
 
 ### Utility
+
 - Avatar
 - Poll
 - Reaction Role
@@ -18,4 +19,5 @@
 - User Info
 
 ### Fun
+
 - Ping
