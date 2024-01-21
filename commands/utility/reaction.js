@@ -56,18 +56,6 @@ module.exports = {
     const title = interaction.options.getString("title");
     const max = interaction.options.getString("maximum");
 
-    if (
-      interaction.member.permissions.has(
-        PermissionsBitField.Flags.ManageRoles
-      ) == false
-    ) {
-      return interaction.reply({
-        content:
-          "You don't have permission to run this command (Manage Roles).",
-        ephemeral: true,
-      });
-    }
-
     if (reactionEmojis.length !== roles.length) {
       return interaction.reply({
         content: "The number of emojis and roles must match.",
