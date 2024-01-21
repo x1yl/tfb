@@ -60,6 +60,23 @@ for (const file of eventFiles) {
 const uri = mongoUri;
 const mongodb = new MongoClient(uri);
 
+client.on("guildMemberUpdate", (oldMember, newMember) => {
+  const oldStatus = oldMember.premiumSince;
+  const newStatus = newMember.premiumSince;
+
+  if (!oldStatus && newStatus) {
+    client.channels.cache
+      .get(boostChannel)
+      .send(`Thank you ${newMember} (:`);
+  }
+
+  if (oldStatus && !newStatus) {
+    client.channels.cache
+      .get(boostChannel)
+      .send(`woah ${newMember}, unboost this server`);
+  }
+});
+
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
   // When a reaction is received, check if the structure is partial
   if (reaction.partial) {
