@@ -15,8 +15,12 @@
   "author": "fryvex",
   "license": "ISC",
   "dependencies": {
+    "amaribot.js": "^2.1.0",
+    "axios": "^1.6.5",
     "discord.js": "^14.13.0",
+    "emoji-regex": "^10.3.0",
     "fs": "^0.0.1-security",
+    "got": "^14.0.0",
     "mongodb": "6.2"
   }
 }

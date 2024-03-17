@@ -7,7 +7,7 @@ const {
   Partials,
   Collection,
 } = require("discord.js");
-const { token, mongoUri } = require("./config.json");
+const { token, mongoUri, boostChannel } = require("./config.json");
 const { MongoClient } = require("mongodb");
 
 const client = new Client({
@@ -15,6 +15,8 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
   ],
   partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
